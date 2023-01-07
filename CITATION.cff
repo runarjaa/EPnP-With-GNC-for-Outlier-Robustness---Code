@@ -9,5 +9,5 @@ authors:
   - given-names: Runar
     family-names: Jåtun
 repository-code: >-
-  https://github.com/runarjaa/Efficient-Perspective-n-Point-With-Graduated-Non-Convexity-for-Outlier-Robustness.git
+  https://github.com/runarjaa/TPK4960-EPnP_with_GNC_for_Outlier_Robustness.git
 license: MIT
