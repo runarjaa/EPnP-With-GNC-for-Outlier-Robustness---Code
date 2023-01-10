@@ -1,10 +1,7 @@
 """
-This is the EPnP+GNC implementation used in the master's thesis by Runar Jåtun.
+This is the EPnP+GNC implementation used in the master's thesis by Runar Jåtun:
 
-I have used some from my project, but I have rewritten a lot to make the code
-work more like the original matlab code from Lepetit. I have also tried to comment 
-the code better in order to make it more understandable for the reader (and myself).
-
+    EPnP with GNC for Outlier Robustness
 
 The code is supposed to run like this:
 
@@ -12,12 +9,11 @@ The code is supposed to run like this:
     epnp = EPnP()
     epnp.load_data(xh_w, pix, Tr, Ca)
     epnp.compute_epnp(GN = True/False, GNC = True/False):
-    Rt_best = epnp.Rt_best
+    Rt_best = epnp.Rt_best # Or whatever you wish to use
 
 There are many analytical functionalities implemented in this code, so there is 
-much to learn about EPnP+GNC in this code.
-
-This also means that the efficiency of the code is not very good. Using a better 
+much to learn about EPnP+GNC using this code. All the analytical functionality
+also means that the efficiency of the code is not very good. Using a better 
 implementation and having less analytics would improve the efficiency I believe.
 
 
@@ -363,7 +359,6 @@ class EPnP:
 
 
     # ---------- Defining funtions used -----------------------
-    
     # Defning control points, one is centroid, three are principal axes
     def define_control_points(self):
         c0 = np.mean(self.x_w, axis=0)
@@ -430,8 +425,6 @@ class EPnP:
     
 
     # Computing L matrix from Lb = p
-    # Did not understand this, so this is on "loan" from EPnP Python. It is very 
-    # similar to the original code from Lepetit
     def compute_L_6_10(self, Kernel_given, given = False):
         L_6_10 = np.zeros((6,10), dtype=np.complex)
 
@@ -576,15 +569,14 @@ class EPnP:
 
 
     # Calculating the rotation matrix and the translation, and then combining
-    # The method for this is basically Procrustes Method
+    # The method for this is more or less Procrustes Method
     def getRotT(self, wpts, cpts):
         wcent = np.tile(np.mean(wpts, axis=0).reshape((1, 3)), (self.n, 1))
         ccent = np.tile(np.mean(cpts, axis=0).reshape((1, 3)), (self.n, 1))
         self.wpts = (wpts.reshape((self.n, 3)) - wcent)
         self.cpts = (cpts.reshape((self.n, 3)) - ccent)
 
-        # If GNC has failed, cpts will be all zeros
-        # This is an attempt of error handling
+        # If GNC has failed, cpts will be all zeros, so this is an attempt of error handling
         if np.sum(np.real(cpts.any())) == 0:
             print("Error")
             return np.eye(3, 4)
@@ -592,15 +584,11 @@ class EPnP:
         M = self.cpts.T @ self.wpts
         
         U, S, Vt = np.linalg.svd(M)
-        # R = U @ Vt
 
-        # Alternative method, from lectures at NTNU
-        # Do not know which is more accurate
+        # R = U @ Vt
+        # Alternative method, from lectures at NTNU:
         intermediate = np.diag([1,1,np.linalg.det( Vt.T @ U.T)])
         R = (Vt.T @ intermediate @ U.T).T
-
-        # Should have used the umeyama algorithm
-        
 
         if np.linalg.det(R) < 0:
             R = - R
@@ -775,7 +763,7 @@ class EPnP:
         #     self.point_calc = np.real(self.x_c3)
 
     # Plotting pixels using Open3D
-    # This function does not work when GNC is run, because the n is changed
+    # This function does not work when GNC is run, because the n is changed after outlier removal
     def plot_set_pixels(self, version, x_c):
         # snorm = x_c*(1/x_c[:,2].reshape((self.n,1))) # Real
         snorm = x_c[:self.n_init,:]*(1/x_c[:self.n_init,2].reshape((self.n_init,1)))
@@ -875,7 +863,7 @@ class EPnP:
         # Drawing the pixels
         o3d.visualization.draw_geometries(geometries, width=1600, height=900)
 
-    # This function does not work when GNC is run, because the n is changed
+    # This function does not work when GNC is run, because the n is changed after outlier removal
     def plot_results_o3d(self, version):
         # geometry array
         geometries = []
